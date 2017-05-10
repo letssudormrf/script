@@ -3,45 +3,33 @@
 #specify the access infromation
 USER="MUDB"
 PORT="443"
-PASSWORD="centos7-ssr-mudb-sh"
+PASSWORD="ubuntu1604-ssr-mudb-sh"
 METHOD="chacha20"
 PROTOCOL="auth_aes128_md5"
 OBFS="tls1.2_ticket_auth"
 
-#use firewalld service to specify the port for the access permission. 
-firewall-cmd --add-port=${PORT}/tcp --permanent
-firewall-cmd --add-port=${PORT}/udp --permanent
-firewall-cmd --reload
-
-#make yum cache for serach packages
-yum makecache
-
-#install the EPEL-release packages
-yum install epel-release -y
-
+#download add-apt-repository
+apt-get update
+apt-get install software-properties-common -y
 #download the repository for updating the latest version kernel, such as 4.10
-rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
-rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
-yum --enablerepo=elrepo-kernel install kernel-ml -y
+add-apt-repository ppa:canonical-kernel-team/ppa -y
+apt-get update
+apt-get install linux-headers-4.10.0-20-generic linux-image-4.10.0-20-generic linux-image-extra-4.10.0-20-generic linux-headers-4.10.0-20 -y
 
-#check which is the latest kernel
-awk -F\' '$1=="menuentry " {print ++i":"$2}' /etc/grub2.cfg
-#set the latest kernel for grub2 default kernel boot up
-grub2-set-default 1
-
-#install the shadowsocksr service
-yum install git python-gevent supervisor -y
+#install the shadowsocksr service 
+apt-get install git python-gevent supervisor -y
 #install the libsodium library for supporting the encryption of chacha20 and chacha20-ietf
-yum install libsodium -y
+apt-get install libsodium-dev -y
 #git clone the latest source code to /usr/local/
 cd /usr/local/ && git clone https://github.com/shadowsocksr/shadowsocksr.git && cd /usr/local/shadowsocksr && bash initcfg.sh
 sed -i 's/sspanelv2/mudbjson/' userapiconfig.py
 #add the access infromation as below.
 python mujson_mgr.py -a -u ${USER} -p ${PORT} -m ${METHOD} -k ${PASSWORD} -O ${PROTOCOL} -o ${OBFS} -G "#"
+#cd /usr/local/shadowsocksr && python mujson_mgr.py -a -u MUDB -p 443 -m chacha20 -k ubuntu1604-ssr-mudb-sh -O auth_aes128_md5 -o tls1.2_ticket_auth
 
 #add supervisor config for ssr autostart
-systemctl enable supervisord
-cat <<EOF > /etc/supervisord.d/ssr.ini
+systemctl enable supervisor
+cat <<EOF > /etc/supervisor/conf.d/ssr.conf
 [program:ssr]
 command=/usr/bin/python /usr/local/shadowsocksr/server.py m
 autostart=true
@@ -52,7 +40,7 @@ EOF
 #unlimit the conection
 sed -i '/#@student        -/a \*               hard    nofile          1024000' /etc/security/limits.conf
 sed -i '/#@student        -/a \*               soft    nofile           512000' /etc/security/limits.conf
-sed -i '/SysVStartPriority=99/a\LimitNOFILE=512000' /usr/lib/systemd/system/supervisord.service
+sed -i '/# Additional/a ulimit -n 512000' /etc/default/supervisor
 
 #setup the newest congestion google bbr and add to sysctl.conf
 cat <<EOF >> /etc/sysctl.conf
@@ -107,5 +95,5 @@ net.core.default_qdisc=fq_codel
 net.ipv4.tcp_congestion_control=bbr
 EOF
 
-#reboot the centos7
+#reboot the ubuntu
 sync; shutdown -r now
