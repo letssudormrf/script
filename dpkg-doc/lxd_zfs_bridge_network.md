@@ -62,3 +62,8 @@ LXD, ZFS and bridged networking on Ubuntu 16.04 LTS+
     lxc config set core.https_address [::]
     lxc config set core.trust_password some-secret-string
 
+### Add the device to lxc container
+
+    lxc profile device add docker tuntap unix-char path=/dev/net/tun
+    lxc profile device add default kvm unix-char path=/dev/kvm
+
