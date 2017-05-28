@@ -14,7 +14,7 @@ apt-get install software-properties-common -y
 #download the repository for updating the latest version kernel, such as 4.10
 add-apt-repository ppa:canonical-kernel-team/ppa -y
 apt-get update
-apt-get install linux-headers-4.10.0-20-generic linux-image-4.10.0-20-generic linux-image-extra-4.10.0-20-generic linux-headers-4.10.0-20 -y
+apt-get install linux-headers-4.10.0-22-generic linux-image-4.10.0-22-generic linux-image-extra-4.10.0-22-generic linux-headers-4.10.0-22 -y
 
 #install the shadowsocksr service 
 apt-get install git python-gevent supervisor -y
