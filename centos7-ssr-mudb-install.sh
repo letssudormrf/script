@@ -34,7 +34,7 @@ yum install git python-gevent supervisor -y
 #install the libsodium library for supporting the encryption of chacha20 and chacha20-ietf
 yum install libsodium -y
 #git clone the latest source code to /usr/local/
-cd /usr/local/ && git clone https://github.com/shadowsocksr/shadowsocksr.git && cd /usr/local/shadowsocksr && bash initcfg.sh
+cd /usr/local/ && git clone https://github.com/shadowsocksrr/shadowsocksr -b akkariiin/master && cd /usr/local/shadowsocksr && bash initcfg.sh
 sed -i 's/sspanelv2/mudbjson/' userapiconfig.py
 #add the access infromation as below.
 python mujson_mgr.py -a -u ${USER} -p ${PORT} -m ${METHOD} -k ${PASSWORD} -O ${PROTOCOL} -o ${OBFS} -G "#"
